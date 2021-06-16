@@ -1,0 +1,25 @@
+---
+- name: create users
+  user: 
+    name: "{{ item }}"
+    state: present
+    create_home: true
+    shell: /bin/bash
+  loop:
+    - user2
+
+- name: allow users to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    line: "{{ item }} ALL=(ALL) NOPASSWD: ALL"
+    validate: /usr/sbin/visudo -cf %s
+  loop:
+    - user2
+
+- name: set up authorized keys for users
+  authorized_key: 
+    user: "{{ item }}"
+    state: present
+    key: "{{ lookup('file', '../files/id_rsa.pub') }}"
+  loop:
+    - user2

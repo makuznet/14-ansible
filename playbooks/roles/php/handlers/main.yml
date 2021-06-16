@@ -1,0 +1,11 @@
+---
+- name: stop apache2
+  service:
+    name: apache2
+    state: stopped
+    enabled: false
+
+- name: reload_php-fpm
+  service:
+    name: php7.3-fpm
+    state: restarted

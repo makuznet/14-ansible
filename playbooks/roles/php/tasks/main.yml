@@ -1,0 +1,45 @@
+---
+- name: install apps
+  apt:
+    update_cache: yes
+    name: "{{ item }}"
+    state: present
+  loop:
+    - php
+    - php-fpm
+    - php-mbstring
+    - php-dom  
+  notify:
+    - stop apache2
+
+- name: document root dir
+  file:
+    path: "{{ item.dir_path }}"
+    state: directory
+  loop:
+    - {dir_path: "/opt/nginx/ansible"} 
+
+- name: conveying files via template
+  template:
+    src: "{{item.src_file}}"
+    dest: "{{item.dest_file}}"
+  loop:
+    - {
+      src_file: "index.php.j2",
+      dest_file: "/opt/nginx/ansible/index.php",
+    }
+  notify:
+    - reload_php-fpm
+
+- name: copy www.conf
+  copy:
+    src: "{{item.src_file}}"
+    dest: "{{item.dest_file}}"
+    
+  loop:
+    - {
+      src_file: "../files/www.conf",
+      dest_file: "/etc/php/7.3/fpm/pool.d/www.conf",
+    }
+  notify:
+    - reload_php-fpm
